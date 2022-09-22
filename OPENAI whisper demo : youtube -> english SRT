@@ -1,0 +1,84 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "collapsed_sections": [],
+      "private_outputs": true,
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Varshul/Blog-Reference-Functions/blob/master/OPENAI%20whisper%20demo%20%3A%20youtube%20-%3E%20english%20SRT\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "metadata": {
+        "id": "H4rxNhsEpr-c",
+        "cellView": "form"
+      },
+      "cell_type": "code",
+      "source": [
+        "#@title INSTALL DEPENDENCIES\n",
+        "!pip install --quiet ffmpeg-python git+https://github.com/openai/whisper.git > /dev/null --q\n",
+        "!pip3 install gradio --q\n",
+        "!pip3 install vtt_to_srt3 --q\n",
+        "!sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl\n",
+        "!sudo chmod a+rx /usr/local/bin/youtube-dl"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#@title Launch the APP\n",
+        "\n",
+        "import gradio as gr\n",
+        "import os\n",
+        "import subprocess\n",
+        "\n",
+        "from vtt_to_srt.vtt_to_srt import vtt_to_srt\n",
+        "\n",
+        "\n",
+        "def greet(youtube_link,source_language):\n",
+        "    print(1)\n",
+        "    subprocess.run('youtube-dl -f bestaudio '+str(youtube_link)+' -o \"audio.m4a\"',shell=True)\n",
+        "    print(2)\n",
+        "    subprocess.run('whisper audio.m4a --language '+str(source_language)+' --task translate',shell=True)\n",
+        "    print(3)\n",
+        "    path = '/content/audio.m4a.vtt'\n",
+        "    vtt_to_srt(path)\n",
+        "    with open('/content/audio.m4a.srt','r') as file:\n",
+        "      data=file.read()\n",
+        "    return data,'/content/audio.m4a.srt'\n",
+        "\n",
+        "demo = gr.Interface(\n",
+        "    fn=greet,\n",
+        "    inputs=[gr.Textbox(lines=2, placeholder=\"paste youtube link here\"),gr.Textbox(lines=2, placeholder=\"enter the source language (Marathi,Hindi,Spanish...etc)\")],\n",
+        "    outputs=[gr.Textbox(label=\"SRT/SUBS\"),gr.File(label=\"Download the SRT/SUBS\")]\n",
+        ")\n",
+        "demo.launch(debug=True)"
+      ],
+      "metadata": {
+        "cellView": "form",
+        "id": "wAkVkxq6octM"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
